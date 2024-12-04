@@ -1,6 +1,7 @@
 import { Collection, Db } from 'mongodb';
 import { DB } from '@root/config';
 import { validatePreferences } from './validatePreferences';
+import { EmbedBuilder } from 'discord.js';
 
 // class to store the info of the preferences the user previously put in to match to jobs in the database
 interface JobPreferences {
@@ -31,13 +32,17 @@ export class JobPreferenceAPI {
 		this.collection = db.collection(DB.USERS);
 	}
 
-	async storeFormResponses(userID: string, answers: string[], questionSet: number): Promise<boolean> {
+	async storeFormResponses(userID: string, answers: string[], questionSet: number): Promise<{ success: boolean; message: string }> {
+		// If user id does not exist, then nothing will be stored
+		if (!userID?.trim()) {
+			return { success: false, message: 'Invalid User ID' };
+		}
 		try {
 			const updateObject = {};
 			const { isValid, errors } = validatePreferences(answers, questionSet, true);
 			if (!isValid) {
 				console.error('Validation failed', errors);
-				return false;
+				return { success: false, message: 'Invalid preferences provided' };
 			}
 			// Adds answers to questions.
 			if (questionSet === 0) {
@@ -55,7 +60,8 @@ export class JobPreferenceAPI {
 				if (interest4?.trim()) updateObject['jobPreferences.answers.interest4'] = interest4;
 				if (interest5?.trim()) updateObject['jobPreferences.answers.interest5'] = interest5;
 			}
-			// Updates preferences with new answers and the new date inputted.
+			// Updates preferences with new answers and the new date inputted if the answers length is greater than 0.
+			if (Object.keys(updateObject).length === 0) return { success: false, message: 'No valid answers provided' };
 			if (Object.keys(updateObject).length > 0) {
 				await this.collection.updateOne(
 					{ discordId: userID },
@@ -69,33 +75,48 @@ export class JobPreferenceAPI {
 					{ upsert: true }
 				);
 			}
-			return true;
+			return { success: true, message: 'Preferences stored successfully' };
 		} catch (error) {
 			console.error('Error storing job form responses', error);
-			return false;
+			return { success: false, message: 'Failed to store preferences' };
 		}
 	}
 	// Gets the preferences anwers from the database.
-	async getPreference(userID: string): Promise<boolean> {
+	async getPreference(userID: string): Promise<{ success: boolean; data?; message: string }> {
+		// If user id does not exist, then nothing will be stored
+		if (!userID?.trim()) {
+			return { success: false, message: 'Invalid User ID' };
+		}
 		try {
 			const user = await this.collection.findOne({ discordId: userID });
-			return user?.jobPreferences || null;
+			return {
+				success: true,
+				data: user?.jobPreferences || null,
+				message: user?.jobPreferences ? 'Preferences found' : 'No preferences found'
+			};
 		} catch (error) {
 			console.error('Error getting job form responses', error);
-			return false;
+			return { success: false, message: 'Failed to retrieve preferences' };
 		}
 	}
 	// Deletes the preferences answers to an empty string.
-	async deletePreference(userID: string): Promise<boolean> {
+	async deletePreference(userID: string): Promise<{ success: boolean; message: string }> {
+		// If user id does not exist, then nothing will be stored
+		if (!userID?.trim()) {
+			return { success: false, message: 'Invalid User ID' };
+		}
 		try {
 			const result = await this.collection.updateOne(
 				{ discordId: userID },
 				{ $unset: { jobPreferences: '' } }
 			);
-			return result.modifiedCount > 0;
+			return {
+				success: result.modifiedCount > 0,
+				message: result.modifiedCount > 0 ? 'Preferences deleted' : 'No preferences found'
+			};
 		} catch (error) {
 			console.error('Error deleting job preference', error);
-			return false;
+			return { success: false, message: 'Failed to delete preferences' };
 		}
 	}
 
