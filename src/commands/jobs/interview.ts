@@ -2,7 +2,8 @@ import {
 	ActionRowBuilder,
 	StringSelectMenuBuilder,
 	ChatInputCommandInteraction,
-	InteractionResponse
+	InteractionResponse,
+	StringSelectMenuInteraction
 } from 'discord.js';
 import { Command } from '@lib/types/Command';
 // import { setTimeout } from 'timers';
@@ -44,11 +45,22 @@ export default class extends Command {
 
 		const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(selectMenu);
 
-		return interaction.reply({
+		await interaction.reply({
 			content:
 				'Choose a job role to practice interview questions:',
 			components: [row]
 		});
+
+		return;
 	}
 
+}
+
+export async function handleInterviewOptionSelect(i: StringSelectMenuInteraction): Promise<void> {
+	try {
+		await i.user.send('Here is where the interview will take place.');
+		await i.reply({ content: 'Check your DMs for the interview', ephemeral: true });
+	} catch (err) {
+		await i.reply({ content: "I couldn't DM you. Please check your privacy settings.", ephemeral: true });
+	}
 }
