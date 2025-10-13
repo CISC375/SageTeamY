@@ -46,7 +46,7 @@ export default class extends Command {
 
 		return interaction.reply({
 			content:
-				'Choose a  job role to practice interview questions:',
+				'Choose a job role to practice interview questions:',
 			components: [row]
 		});
 	}
