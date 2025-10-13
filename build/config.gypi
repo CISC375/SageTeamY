@@ -488,7 +488,7 @@
     "v8_use_siphash": 1,
     "want_separate_host_toolset": 0,
     "xcode_version": "16.0",
-    "nodedir": "/Users/Larissa/Library/Caches/node-gyp/23.11.0",
+    "nodedir": "/Users/Larissa/Library/Caches/node-gyp/23.11.1",
     "python": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
     "standalone_static_library": 1,
     "fallback_to_build": "true",
