@@ -152,29 +152,43 @@ export default class extends Command {
     });
 
     collector.on('collect', async (i: any) => {
-      const chosenId = i.values[0]; // stringified ObjectId
-      const chosen = reminders.find(r => (r as any)._id?.toString() === chosenId);
-      if (!chosen) {
-        return i.reply({ content: 'That reminder no longer exists.', ephemeral: true });
-      }
-
-      const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`confirm:${chosenId}`)
-          .setLabel('Confirm cancel')
-          .setStyle(ButtonStyle.Danger),
-        new ButtonBuilder()
-          .setCustomId('cancel')
-          .setLabel('Never mind')
-          .setStyle(ButtonStyle.Secondary)
-      );
-
-      await i.reply({
-        content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
-        components: [confirmRow],
-        ephemeral: true,
-      });
-    });
+		const chosenId = i.values[0];
+		const chosen = reminders.find(r => (r as any)._id?.toString() === chosenId);
+		if (!chosen) {
+		  // since the collector is tied to this message, use update/deferUpdate patterns
+		  return i.update({ content: 'That reminder no longer exists.', components: [] });
+		}
+	  
+		const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		  new ButtonBuilder()
+			.setCustomId(`confirm:${chosenId}`)
+			.setLabel('Confirm cancel')
+			.setStyle(ButtonStyle.Danger),
+		  new ButtonBuilder()
+			.setCustomId('cancel')
+			.setLabel('Never mind')
+			.setStyle(ButtonStyle.Secondary)
+		);
+	  
+		// optionally disable the select so users can't pick twice
+		const disabledMenu = (i.message.components?.[0]) ?? null;
+		if (disabledMenu) {
+		  // clone row & disable the select
+		  const row = ActionRowBuilder.from(disabledMenu) as ActionRowBuilder<StringSelectMenuBuilder>;
+		  const select = StringSelectMenuBuilder.from(row.components[0] as any).setDisabled(true);
+		  row.setComponents(select);
+		  return i.update({
+			content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
+			components: [row, ...(i.message.components?.slice(1) ?? []), confirmRow],
+		  });
+		}
+	  
+		return i.update({
+		  content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
+		  components: [confirmRow],
+		});
+	  });
+	  
 
     buttonCollector.on('collect', async (i: any) => {
       try {
