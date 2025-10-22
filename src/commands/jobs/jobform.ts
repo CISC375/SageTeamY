@@ -34,6 +34,7 @@ const questions: string[] = [
 ];
 
 export default class JobFormCommand extends Command {
+
 	name = 'jobform';
 	description = 'Starts a job preferences form via direct message.';
 	options: ApplicationCommandOptionData[] = [];
@@ -148,4 +149,5 @@ export default class JobFormCommand extends Command {
 		// start the first question
 		ask();
 	}
+
 }
