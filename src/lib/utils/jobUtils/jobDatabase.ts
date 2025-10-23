@@ -21,7 +21,7 @@ export class JobPreferenceAPI {
 			const updateObject = {};
 			// Checks if the answer provided is accuate.
 
-			const [city, workType, employmentType, travelDistance, _, interest1, interest2, interest3, interest4, interest5] = answers.map((a) => titleCase(a.trim()));
+			const [city, workType, employmentType, travelDistance, , interest1, interest2, interest3, interest4, interest5] = answers.map((a) => titleCase(a.trim()));
 
 			if (city) { updateObject['jobPreferences.answers.city'] = city; }
 			if (workType) { updateObject['jobPreferences.answers.workType'] = workType; }
