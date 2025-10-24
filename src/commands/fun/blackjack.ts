@@ -9,6 +9,16 @@ import { ChatInputCommandInteraction,
 	ComponentType }
 	from 'discord.js';
 
+/*
+ TO DO:
+ "Stand" button functionality
+ "Rules" button functionality
+ Dealer's hand logic
+ Embed = Green on winning game
+ Testing proper Ace functionality
+ Implementing a winning game state
+*/
+
 export default class extends Command {
 
 	description = 'Challenge Sage to a round of Black Jack!';
@@ -37,6 +47,7 @@ export default class extends Command {
 				)
 				.setFooter({ text: status });
 
+			// Color of the embed on the left changes depending on if it's game over or not
 			if (gameOver) {
 				embed.setColor('Red');
 			} else {
