@@ -20,7 +20,7 @@ export default class extends Command {
 		playerHand = deck[Math.floor(Math.random() * 10) + 1] + deck[Math.floor(Math.random() * 10) + 1];
 		const dealerHand = 7;
 		let drawnCard = 0;
-		let gameStatus = "CLick 'Hit' to draw or 'Stand' to pass";
+		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
 
 		// Creates game window/embed
@@ -29,17 +29,18 @@ export default class extends Command {
 				// Sets attributes for the game embed
 				.setColor('#0099FF')
 				.setTitle('Blackjack 🃏')
-				.setDescription(status)
 				.addFields(
 					// Creates a field for the dealer's hand
 					{ name: "Dealer's Hand", value: `**${dealer}**`, inline: true },
 					// Creates a field for the player's hand
 					{ name: `${interaction.user.username}'s Hand`, value: `**${player}**`, inline: true }
-				);
+				)
+				.setFooter({ text: status });
+
 			if (gameOver) {
-				embed.setColor('Blue');
-			} else {
 				embed.setColor('Red');
+			} else {
+				embed.setColor('Blue');
 			}
 			return embed;
 		};
