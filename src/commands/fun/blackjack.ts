@@ -41,9 +41,14 @@ export default class extends Command {
 			.setLabel('Stand')
 			.setStyle(ButtonStyle.Danger); // .Danger = Red button
 
+		const rulesButton = new ButtonBuilder()
+			.setCustomId('blackjack-rules')
+			.setLabel('Rules')
+			.setStyle(ButtonStyle.Primary) // .Primary = Blue button
+
 		// Puts the "Hit" and "Stand" buttons into a row
 		const row = new ActionRowBuilder<ButtonBuilder>()
-			.addComponents(hitButton, standButton);
+			.addComponents(hitButton, standButton, rulesButton);
 
 		// Sage replies with the game's embed and buttons
 		await interaction.reply({
