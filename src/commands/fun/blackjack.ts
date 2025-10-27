@@ -102,7 +102,7 @@ export default class extends Command {
 		const collector = response.resource.message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			filter: filter,
-			time: 60000 // You have 1 minute before the buttons are disabled
+			time: 120000 // You have 2 minutes before the buttons are disabled
 		});
 
 		// Handles "hit" button click
