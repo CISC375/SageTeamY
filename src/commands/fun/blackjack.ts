@@ -19,6 +19,9 @@ import { ChatInputCommandInteraction,
  Implementing a winning game state
 */
 
+// Introduces a helper "wait" function to make the bot wait X amount of milliseconds
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export default class extends Command {
 
 	description = 'Challenge Sage to a round of Black Jack!';
@@ -34,6 +37,7 @@ export default class extends Command {
 		playerHand = deck[Math.floor(Math.random() * 13)] + deck[Math.floor(Math.random() * 13)];
 		const dealerHand = deck[Math.floor(Math.random() * 13)];
 		let drawnCard = 0;
+		let dealerDrawnCard = 0;
 		// GameStatus is the text appearing at the bottom of the Game Embed
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
@@ -143,7 +147,41 @@ export default class extends Command {
 
 			// Handles a "stand" button click
 			if (i.customId === 'blackjack_stand') {
-				return;
+				gameStatus = 'You stood your ground!';
+
+				// Updates game status so you can't click buttons
+				const standEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
+				await response.resource.message.edit({
+					embeds: [standEmbed],
+					components: []
+				});
+
+				// Allows user to read game status before continuing
+				await wait(1500);
+				dealerDrawnCard = Math.floor(Math.random() * 13);
+
+				// Shows user what card the dealer drew
+				if (dealerDrawnCard === 9) {
+					gameStatus = `The dealer revealed a Jack (10).`;
+				} else if (dealerDrawnCard === 10) {
+					gameStatus = 'The dealer revealed a Queen (10).';
+				} else if (dealerDrawnCard === 11) {
+					gameStatus = 'The dealer revealed a King (10).';
+				} else if (dealerDrawnCard === 12) {
+					gameStatus = 'The dealer revealed an Ace (10).';
+				} else {
+					gameStatus = `The dealer revealed a ${dealerDrawnCard + 2}.`;
+				}
+
+				// Converts an Ace from 11 points to 1 point if total points is over 21
+				if (dealerDrawnCard === 11 && (dealerDrawnCard + dealerHand) > 21) {
+					dealerDrawnCard = 1;
+				}
+
+				// Updates game status
+				await i.update({
+					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+				});
 			}
 
 			// Handles a "rules" button click
