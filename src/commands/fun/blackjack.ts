@@ -107,7 +107,7 @@ export default class extends Command {
 			time: 60000 // You have 1 minute before the buttons are disabled
 		});
 
-
+		// Handles "hit" button click
 		async function handleHit(i: ButtonInteraction) {
 			// Draws a card from 0-12, and uses the deck[] array to index for the card
 			drawnCard = Math.floor(Math.random() * 13);
@@ -128,7 +128,7 @@ export default class extends Command {
 			if (drawnCard === 12 && (playerHand + drawnCard) > 21) {
 				drawnCard = 13;
 				gameStatus = 'You drew an Ace (1).';
-			} else {
+			} else if (drawnCard === 12) {
 				gameStatus = 'You drew an Ace (11).';
 			}
 			playerHand += deck[drawnCard];
@@ -145,9 +145,12 @@ export default class extends Command {
 			});
 		}
 
+		// Handles "stand" button click
 		async function handleStand(i: ButtonInteraction) {
-			gameStatus = 'You stood your ground!';
+			// Acknowledges the button has been clicked
+			await i.deferUpdate();
 
+			gameStatus = 'You stood your ground! Dealer\'s turn...';
 			// Updates game status so you can't click buttons
 			const standEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
 			await response.resource.message.edit({
@@ -157,9 +160,10 @@ export default class extends Command {
 
 			// Allows user to read game status before continuing
 			await wait(1500);
+
 			dealerDrawnCard = Math.floor(Math.random() * 13);
 
-			// Shows user what card the dealer drew
+			// Shows user what card the dealer revealed
 			if (dealerDrawnCard === 9) {
 				gameStatus = `The dealer revealed a Jack (10).`;
 			} else if (dealerDrawnCard === 10) {
@@ -175,16 +179,17 @@ export default class extends Command {
 			if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
 				drawnCard = 13;
 				gameStatus = 'The dealer revealed an Ace (1).';
-			} else {
+			} else if (dealerDrawnCard === 12) {
 				gameStatus = 'The dealer revealed an Ace (11).';
 			}
 			dealerHand += dealerDrawnCard;
 
 			// Updates game status
-			await i.update({
+			await i.editReply({
 				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 			});
 
+			// Keeps hitting if below 17 point threshold
 			while (dealerHand <= 16) {
 				// Allows user to read game status before continuing
 				await wait(1500);
@@ -205,13 +210,13 @@ export default class extends Command {
 				if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
 					drawnCard = 13;
 					gameStatus = 'The dealer drew an Ace (1).';
-				} else {
+				} else if (dealerDrawnCard === 12) {
 					gameStatus = 'The dealer drew an Ace (11).';
 				}
 				dealerHand += dealerDrawnCard;
 
 				// Updates game status
-				await i.update({
+				await i.editReply({
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
 			}
@@ -221,7 +226,7 @@ export default class extends Command {
 
 		// Handles a "rules" button click
 		async function handleRules(i: ButtonInteraction) {
-			return;
+			return i;
 		}
 
 		collector.on('collect', async (i) => {
