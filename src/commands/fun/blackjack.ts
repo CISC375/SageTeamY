@@ -41,6 +41,7 @@ export default class extends Command {
 		// GameStatus is the text appearing at the bottom of the Game Embed
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
+		let win = false;
 
 		// Accounts for two aces drawn at the start, going over 21
 		if (playerHand === 22) {
@@ -62,8 +63,10 @@ export default class extends Command {
 				.setFooter({ text: status });
 
 			// Color of the embed on the left changes depending on if it's game over or not
-			if (gameOver) {
+			if (gameOver && !win) {
 				embed.setColor('Red');
+			} else if (gameOver && win) {
+				embed.setColor('Green');
 			} else {
 				embed.setColor('Blue');
 			}
@@ -220,6 +223,8 @@ export default class extends Command {
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
 			}
+
+			// Tells user if the dealer stands or busts (if over 21 points)
 			if (dealerHand <= 21) {
 				gameStatus = 'The dealer stands.';
 			} else {
@@ -232,7 +237,12 @@ export default class extends Command {
 
 			await wait(1500);
 
-			collector.stop('stand');
+			// Handles end of game condition of dealer standing or busting
+			if (dealerHand <= 21) {
+				collector.stop('stand');
+			} else {
+				collector.stop('dealer_bust');
+			}
 		}
 
 		// Handles a "rules" button click
@@ -264,6 +274,7 @@ export default class extends Command {
 					gameStatus = 'Dealer wins.';
 				} else {
 					gameStatus = 'You win!';
+					win = true;
 				}
 			}
 
