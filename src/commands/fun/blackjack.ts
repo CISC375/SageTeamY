@@ -136,7 +136,7 @@ export default class extends Command {
 			playerHand += deck[drawnCard];
 
 			// Updates game status
-			if (playerHand >= 21) {
+			if (playerHand > 21) {
 				// Removes buttons if bust
 				const hitBustEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
 				await response.resource.message.edit({
