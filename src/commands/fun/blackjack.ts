@@ -224,6 +224,8 @@ export default class extends Command {
 				});
 			}
 
+			await wait(1500);
+
 			// Tells user if the dealer stands or busts (if over 21 points)
 			if (dealerHand <= 21) {
 				gameStatus = 'The dealer stands.';
