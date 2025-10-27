@@ -139,6 +139,10 @@ export default class extends Command {
 			}
 			playerHand += deck[drawnCard];
 
+			// Updates game status
+			await i.editReply({
+				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+			});
 
 			// Checks if the user "busts"
 			if (playerHand > 21) {
@@ -148,11 +152,6 @@ export default class extends Command {
 				collector.stop('bust');
 				return;
 			}
-
-			// Updates game status
-			await i.editReply({
-				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
-			});
 		}
 
 		// Handles "stand" button click
