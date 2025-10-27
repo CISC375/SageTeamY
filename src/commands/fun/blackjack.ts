@@ -27,11 +27,16 @@ export default class extends Command {
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		const deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
 		let playerHand = 0;
-		playerHand = deck[Math.floor(Math.random() * 10) + 1] + deck[Math.floor(Math.random() * 10) + 1];
-		const dealerHand = 7;
+		playerHand = deck[Math.floor(Math.random() * 13)] + deck[Math.floor(Math.random() * 13)];
+		const dealerHand = deck[Math.floor(Math.random() * 13)];
 		let drawnCard = 0;
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
+
+		// Accounts for two aces drawn at the start, going over 21
+		if (playerHand === 22) {
+			playerHand = 12;
+		}
 
 		// Creates game window/embed
 		const createGameEmbed = (player: number, dealer: number, status: string) => {
@@ -140,7 +145,7 @@ export default class extends Command {
 				gameStatus = 'Game timed out.';
 			}
 
-			// Updates game embed, and removes the buttonsnh
+			// Updates game embed, and removes the buttons
 			const finalEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
 			await response.edit({
 				embeds: [finalEmbed],
