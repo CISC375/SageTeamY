@@ -20,7 +20,7 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export default class extends Command {
 
 	description = 'Challenge Sage to a round of Black Jack!';
-	extendedHelp = 'Get a higher score than Sage, but do not exceed 21!';
+	extendedHelp = 'Get a higher score than Sage, but do not exceed 21 points!';
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
 		/* Deck consists of cards numbered 2-10.
@@ -51,7 +51,7 @@ export default class extends Command {
 				.setTitle('Blackjack 🃏')
 				.addFields(
 					// Creates a field for the dealer's hand
-					{ name: "Dealer's Hand", value: `**${dealer}**`, inline: true },
+					{ name: "Sage's Hand", value: `**${dealer}**`, inline: true },
 					// Creates a field for the player's hand
 					{ name: `${interaction.user.username}'s Hand`, value: `**${player}**`, inline: true }
 				)
@@ -164,7 +164,7 @@ export default class extends Command {
 			// Acknowledges the button has been clicked
 			await i.deferUpdate();
 
-			gameStatus = 'You stood your ground! Dealer\'s turn...';
+			gameStatus = 'You stood your ground! Sage\'s turn...';
 			// Updates game status so you can't click buttons
 			const standEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
 			await response.resource.message.edit({
@@ -179,22 +179,22 @@ export default class extends Command {
 
 			// Shows user what card the dealer revealed
 			if (dealerDrawnCard === 9) {
-				gameStatus = `The dealer revealed a Jack (10).`;
+				gameStatus = `Sage revealed a Jack (10).`;
 			} else if (dealerDrawnCard === 10) {
-				gameStatus = 'The dealer revealed a Queen (10).';
+				gameStatus = 'Sage revealed a Queen (10).';
 			} else if (dealerDrawnCard === 11) {
-				gameStatus = 'The dealer revealed a King (10).';
+				gameStatus = 'Sage revealed a King (10).';
 			} else if (dealerDrawnCard !== 12) {
-				gameStatus = `The dealer revealed a ${dealerDrawnCard + 2}.`;
+				gameStatus = `Sage revealed a ${dealerDrawnCard + 2}.`;
 			}
 
 			// Handles if an Ace brings the dealer over a score of 21
 			// Converts the Ace from 11 points to 1 point if so
 			if (dealerDrawnCard === 12) {
-				gameStatus = 'The dealer revealed an Ace (11).';
+				gameStatus = 'Sage revealed an Ace (11).';
 				if ((dealerHand + 11) > 21) {
 					drawnCard = 13;
-					gameStatus = 'The dealer revealed an Ace (1).';
+					gameStatus = 'Sage revealed an Ace (1).';
 				}
 			}
 			dealerHand += deck[dealerDrawnCard];
@@ -212,21 +212,21 @@ export default class extends Command {
 
 				// Shows user what card the dealer drew
 				if (dealerDrawnCard === 9) {
-					gameStatus = `The dealer drew a Jack (10).`;
+					gameStatus = `Sage drew a Jack (10).`;
 				} else if (dealerDrawnCard === 10) {
-					gameStatus = 'The dealer drew a Queen (10).';
+					gameStatus = 'Sage drew a Queen (10).';
 				} else if (dealerDrawnCard === 11) {
-					gameStatus = 'The dealer drew a King (10).';
+					gameStatus = 'Sage drew a King (10).';
 				} else if (dealerDrawnCard !== 12) {
-					gameStatus = `The dealer drew a ${dealerDrawnCard + 2}.`;
+					gameStatus = `Sage drew a ${dealerDrawnCard + 2}.`;
 				}
 
 				// Converts an Ace from 11 points to 1 point if total points is over 21
 				if (dealerDrawnCard === 12) {
-					gameStatus = 'The dealer drew an Ace (11).';
+					gameStatus = 'Sage drew an Ace (11).';
 					if ((dealerHand + 11) > 21) {
 						drawnCard = 13;
-						gameStatus = 'The dealer drew an Ace (1).';
+						gameStatus = 'Sage drew an Ace (1).';
 					}
 				}
 				dealerHand += deck[dealerDrawnCard];
@@ -241,9 +241,9 @@ export default class extends Command {
 
 			// Tells user if the dealer stands or busts (if over 21 points)
 			if (dealerHand <= 21) {
-				gameStatus = 'The dealer stands.';
+				gameStatus = 'Sage stands.';
 			} else {
-				gameStatus = 'The dealer busts! You win!';
+				gameStatus = 'Sage busts! You win!';
 				win = true;
 			}
 
@@ -263,7 +263,69 @@ export default class extends Command {
 
 		// Handles a "rules" button click
 		async function handleRules(i: ButtonInteraction) {
-			return i;
+			const rulesEmbed = new EmbedBuilder()
+				.setTitle('Blackjack Rules 🃏')
+				.setColor('Blue')
+				.addFields(
+					{
+						name: 'Objective',
+						value: 'Your goal is to beat the dealer\'s score without exceeding 21 points.\n'
+					},
+					{
+						name: 'Starting the game',
+						value: 'Both you and the dealer will start with 2 cards.\n' +
+						'The dealer\'s second card is hidden initially.'
+					},
+					{
+						name: 'Your Turn',
+						value: 'You can either "Hit" or "Stand".\n' +
+						'Hit: Add a card and its associated points to your total.\n' +
+						'Stand: Stop your turn entirely. Your current points will be your final points.'
+					},
+					{
+						name: 'Card Values',
+						value: '• Cards 2-10 are worth their face value.\n' +
+						'• Jack, Queen, King are all worth 10 points.\n' +
+						'• Ace is worth 11 points or 1 point (whichever is best for your hand).'
+					},
+					{
+						name: 'Busting',
+						value: 'If your hand\'s total goes over 21, you "bust" and immediately lose the round.'
+					},
+					{
+						name: 'The Dealer\'s Turn',
+						value: 'The dealer\'s turn starts right after you "stand".\n' +
+						'The dealer will keep hitting until their hand has 17 points or higher.\n'
+					},
+					{
+						name: 'Winning',
+						value: 'The player who doesn\'t bust and has the most points wins!\n' +
+						'Ties: The dealer automatically wins ties.'
+					}
+				);
+
+			// Attempts to send the rules to the user's direct messages
+			try {
+				await i.user.send({ embeds: [rulesEmbed] });
+
+				// Lets the user know the DM was successful
+				await i.reply({
+					content: 'I\'ve sent the rules to your DMs!',
+					ephemeral: true // Only the person who hit "rules" can see
+				});
+
+			// Catches errors if Sage cannot DM the user
+			} catch (error) {
+				console.error('Failed to send DM. User might have DMs disabled.', error);
+
+				// Sends rules to the user in that channel privately if unable to send them to DMs
+				await i.reply({
+					content: 'Failed to send you a DM. Here are the rules: \n\n',
+					embeds: [rulesEmbed],
+					// eslint-disable-next-line no-mixed-spaces-and-tabs
+            		ephemeral: true
+				});
+			}
 		}
 
 		collector.on('collect', async (i) => {
@@ -287,7 +349,7 @@ export default class extends Command {
 			} else if (reason === 'stand') {
 				// Tells user who had the higher points
 				if (dealerHand >= playerHand) {
-					gameStatus = 'Dealer wins.';
+					gameStatus = 'Sage wins.';
 				} else {
 					gameStatus = 'You win!';
 					win = true;
