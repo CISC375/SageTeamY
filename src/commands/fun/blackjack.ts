@@ -128,7 +128,7 @@ export default class extends Command {
 
 			// Handles if an Ace brings the player over a score of 21
 			// Converts the Ace from 11 points to 1 point if so
-			if (drawnCard === 12 && (playerHand + drawnCard) > 21) {
+			if (drawnCard === 12 && (playerHand + 11) > 21) {
 				drawnCard = 13;
 				gameStatus = 'You drew an Ace (1).';
 			} else if (drawnCard === 12) {
@@ -179,7 +179,7 @@ export default class extends Command {
 
 			// Handles if an Ace brings the dealer over a score of 21
 			// Converts the Ace from 11 points to 1 point if so
-			if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
+			if (dealerDrawnCard === 12 && (dealerHand + 11) > 21) {
 				drawnCard = 13;
 				gameStatus = 'The dealer revealed an Ace (1).';
 			} else if (dealerDrawnCard === 12) {
@@ -210,7 +210,7 @@ export default class extends Command {
 				}
 
 				// Converts an Ace from 11 points to 1 point if total points is over 21
-				if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
+				if (dealerDrawnCard === 12 && (dealerHand + 11) > 21) {
 					drawnCard = 13;
 					gameStatus = 'The dealer drew an Ace (1).';
 				} else if (dealerDrawnCard === 12) {
