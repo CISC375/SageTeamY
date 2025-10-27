@@ -112,6 +112,9 @@ export default class extends Command {
 
 		// Handles "hit" button click
 		async function handleHit(i: ButtonInteraction) {
+			// Acknowledges button click
+			await i.deferUpdate();
+
 			// Draws a card from 0-12, and uses the deck[] array to index for the card
 			drawnCard = Math.floor(Math.random() * 13);
 
@@ -136,14 +139,18 @@ export default class extends Command {
 			}
 			playerHand += deck[drawnCard];
 
+
 			// Checks if the user "busts"
 			if (playerHand > 21) {
+				await wait(1500);
 				gameStatus = 'Bust! You lose.';
+				gameOver = true;
 				collector.stop('bust');
+				return;
 			}
 
 			// Updates game status
-			await i.update({
+			await i.editReply({
 				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 			});
 		}
