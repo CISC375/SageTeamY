@@ -182,7 +182,7 @@ export default class extends Command {
 			} else if (dealerDrawnCard === 12) {
 				gameStatus = 'The dealer revealed an Ace (11).';
 			}
-			dealerHand += dealerDrawnCard;
+			dealerHand += deck[dealerDrawnCard];
 
 			// Updates game status
 			await i.editReply({
@@ -213,7 +213,7 @@ export default class extends Command {
 				} else if (dealerDrawnCard === 12) {
 					gameStatus = 'The dealer drew an Ace (11).';
 				}
-				dealerHand += dealerDrawnCard;
+				dealerHand += deck[dealerDrawnCard];
 
 				// Updates game status
 				await i.editReply({
@@ -221,6 +221,12 @@ export default class extends Command {
 				});
 			}
 			gameStatus = 'The dealer stands.';
+			await i.editReply({
+				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+			});
+
+			await wait(1500);
+
 			collector.stop('stand');
 		}
 
