@@ -9,11 +9,6 @@ import { ChatInputCommandInteraction,
 	ComponentType }
 	from 'discord.js';
 
-/*
- TO DO:
- "Rules" button functionality
-*/
-
 // Introduces a helper "wait" function to make the bot wait X amount of milliseconds
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
