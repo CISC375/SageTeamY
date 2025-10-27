@@ -193,7 +193,7 @@ export default class extends Command {
 			});
 
 			// Keeps hitting if below 17 point threshold
-			while (dealerHand <= 16) {
+			while (dealerHand <= 16 && dealerHand < playerHand) {
 				// Allows user to read game status before continuing
 				await wait(1500);
 				dealerDrawnCard = Math.floor(Math.random() * 13);
@@ -229,6 +229,7 @@ export default class extends Command {
 				gameStatus = 'The dealer stands.';
 			} else {
 				gameStatus = 'The dealer busts! You win!';
+				win = true;
 			}
 
 			await i.editReply({
