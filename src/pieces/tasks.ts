@@ -4,7 +4,7 @@ import {
 	BOT,
 	CHANNELS,
 	DB,
-	GMAIL,
+	EMAIL,
 	MAP_KEY
 } from '@root/config';
 import {
@@ -310,9 +310,9 @@ async function listJobs(
 				? `, Min: ${formattedSalaryMin}, Max: ${formattedSalaryMax}`
 				: formattedAvgSalary;
 
-		jobList += `${i + 1}. **${jobForm[2][i].title}**  
-		  \t\t* **Salary Average:** ${formattedAvgSalary}${salaryDetails}  
-		  \t\t* **Location:** ${jobForm[2][i].location}  
+		jobList += `${i + 1}. **${jobForm[2][i].title}**
+		  \t\t* **Salary Average:** ${formattedAvgSalary}${salaryDetails}
+		  \t\t* **Location:** ${jobForm[2][i].location}
 		  \t\t* **Date Posted:** ${new Date(
 		jobForm[2][i].created
 	).toDateString()} at ${new Date(
@@ -320,7 +320,7 @@ async function listJobs(
 ).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
 		  \t\t* **Apply here:** [read more about the job and apply here](${
 	jobForm[2][i].link
-})  
+})
 		  \t\t* **Distance:** ${formattedDistance}
 		  ${i !== jobForm[2].length - 1 ? '\n' : ''}`;
 	}
@@ -425,8 +425,8 @@ export function stripMarkdown(message: string, owner: string): string {
 }
 
 export function headerMessage(owner: string, filterBy: string): string {
-	return `## Hey <@${owner}>!  
-	### **__Please read this disclaimer before reading your list of jobs/internships__:**  
+	return `## Hey <@${owner}>!
+	### **__Please read this disclaimer before reading your list of jobs/internships__:**
 -# Please be aware that the job listings displayed are retrieved from a third-party API. \
 While we strive to provide accurate information, we cannot guarantee the legitimacy or security \
 of all postings. Exercise caution when sharing personal information, submitting resumes, or registering \
@@ -451,11 +451,8 @@ async function sendEmailNotification(reminder: Reminder): Promise<void> {
 
 	// Create Gmail transporter using credentials from config
 	const mailer = nodemailer.createTransport({
-		service: 'gmail',
-		auth: {
-			user: GMAIL.USER,
-			pass: GMAIL.APP_PASSWORD
-		}
+		host: 'mail.udel.edu',
+		port: 25
 	});
 
 	try {
@@ -489,7 +486,8 @@ async function sendEmailNotification(reminder: Reminder): Promise<void> {
 
 		// Send the email
 		await mailer.sendMail({
-			from: GMAIL.USER,
+			from: EMAIL.SENDER,
+			replyTo: EMAIL.REPLY_TO,
 			to: reminder.emailAddress,
 			subject: subject,
 			html: htmlContent
@@ -533,7 +531,7 @@ async function checkReminders(bot: Client): Promise<void> {
 						user.send(message).catch((err) => {
 							console.log('ERROR:', err);
 							pubChan.send(
-								`<@${reminder.owner}>, I tried to send you a DM about your private reminder but it looks like you have DMs closed. Please enable DMs in the future if 
+								`<@${reminder.owner}>, I tried to send you a DM about your private reminder but it looks like you have DMs closed. Please enable DMs in the future if
 							you'd like to get private reminders.`
 							);
 						});
