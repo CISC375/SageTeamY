@@ -78,7 +78,7 @@ export default class extends Command {
 			.setStyle(ButtonStyle.Danger); // .Danger = Red button
 
 		const rulesButton = new ButtonBuilder()
-			.setCustomId('blackjack-rules')
+			.setCustomId('blackjack_rules')
 			.setLabel('Rules')
 			.setStyle(ButtonStyle.Primary); // .Primary = Blue button
 
@@ -104,6 +104,7 @@ export default class extends Command {
 		});
 
 		collector.on('collect', async (i) => {
+			// Handles a "hit" button click
 			if (i.customId === 'blackjack_hit') {
 				// Draws a card from 0-12, and uses the deck[] array to index for the card
 				drawnCard = Math.floor(Math.random() * 13);
@@ -138,6 +139,16 @@ export default class extends Command {
 				await i.update({
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
+			}
+
+			// Handles a "stand" button click
+			if (i.customId === 'blackjack_stand') {
+				return;
+			}
+
+			// Handles a "rules" button click
+			if (i.customId === 'blackjack_rules') {
+				return;
 			}
 		});
 
