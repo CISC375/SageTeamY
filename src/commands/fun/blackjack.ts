@@ -31,11 +31,11 @@ export default class extends Command {
 		/* Deck consists of cards numbered 2-10.
 		Repeated 10s account for Jack, Queen, King.
 		11 resembles Ace*/
-		const deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
+		const deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11, 1];
 		let playerHand = 0;
 		// Draws two random cards and adds them together from deck[]
 		playerHand = deck[Math.floor(Math.random() * 13)] + deck[Math.floor(Math.random() * 13)];
-		const dealerHand = deck[Math.floor(Math.random() * 13)];
+		let dealerHand = deck[Math.floor(Math.random() * 13)];
 		let drawnCard = 0;
 		let dealerDrawnCard = 0;
 		// GameStatus is the text appearing at the bottom of the Game Embed
@@ -107,93 +107,131 @@ export default class extends Command {
 			time: 60000 // You have 1 minute before the buttons are disabled
 		});
 
-		collector.on('collect', async (i) => {
-			// Handles a "hit" button click
-			if (i.customId === 'blackjack_hit') {
-				// Draws a card from 0-12, and uses the deck[] array to index for the card
-				drawnCard = Math.floor(Math.random() * 13);
 
-				// Shows user what card they drew
-				if (drawnCard === 9) {
-					gameStatus = `You drew a Jack (10).`;
-				} else if (drawnCard === 10) {
-					gameStatus = 'You drew a Queen (10).';
-				} else if (drawnCard === 11) {
-					gameStatus = 'You drew a King (10).';
-				} else if (drawnCard === 12) {
-					gameStatus = 'You drew an Ace (10).';
-				} else {
-					gameStatus = `You drew a ${drawnCard + 2}.`;
-				}
+		async function handleHit(i: ButtonInteraction) {
+			// Draws a card from 0-12, and uses the deck[] array to index for the card
+			drawnCard = Math.floor(Math.random() * 13);
 
-				// Handles if an Ace brings the player over a score of 21
-				// Converts the Ace from 11 points to 1 point if so
-				if (drawnCard === 11 && (playerHand + drawnCard) > 21) {
-					drawnCard = 1;
-				}
-				playerHand += deck[drawnCard];
-
-				// Checks if the user "busts"
-				if (playerHand > 21) {
-					gameStatus = 'Bust! You lose.';
-					collector.stop('bust');
-				}
-
-				// Updates game status
-				await i.update({
-					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
-				});
+			// Shows user what card they drew
+			if (drawnCard === 9) {
+				gameStatus = `You drew a Jack (10).`;
+			} else if (drawnCard === 10) {
+				gameStatus = 'You drew a Queen (10).';
+			} else if (drawnCard === 11) {
+				gameStatus = 'You drew a King (10).';
+			} else if (drawnCard !== 12) {
+				gameStatus = `You drew a ${drawnCard + 2}.`;
 			}
 
-			// Handles a "stand" button click
-			if (i.customId === 'blackjack_stand') {
-				gameStatus = 'You stood your ground!';
+			// Handles if an Ace brings the player over a score of 21
+			// Converts the Ace from 11 points to 1 point if so
+			if (drawnCard === 12 && (playerHand + drawnCard) > 21) {
+				drawnCard = 13;
+				gameStatus = 'You drew an Ace (1).';
+			} else {
+				gameStatus = 'You drew an Ace (11).';
+			}
+			playerHand += deck[drawnCard];
 
-				// Updates game status so you can't click buttons
-				const standEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
-				await response.resource.message.edit({
-					embeds: [standEmbed],
-					components: []
-				});
+			// Checks if the user "busts"
+			if (playerHand > 21) {
+				gameStatus = 'Bust! You lose.';
+				collector.stop('bust');
+			}
 
+			// Updates game status
+			await i.update({
+				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+			});
+		}
+
+		async function handleStand(i: ButtonInteraction) {
+			gameStatus = 'You stood your ground!';
+
+			// Updates game status so you can't click buttons
+			const standEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
+			await response.resource.message.edit({
+				embeds: [standEmbed],
+				components: []
+			});
+
+			// Allows user to read game status before continuing
+			await wait(1500);
+			dealerDrawnCard = Math.floor(Math.random() * 13);
+
+			// Shows user what card the dealer drew
+			if (dealerDrawnCard === 9) {
+				gameStatus = `The dealer revealed a Jack (10).`;
+			} else if (dealerDrawnCard === 10) {
+				gameStatus = 'The dealer revealed a Queen (10).';
+			} else if (dealerDrawnCard === 11) {
+				gameStatus = 'The dealer revealed a King (10).';
+			} else if (dealerDrawnCard !== 12) {
+				gameStatus = `The dealer revealed a ${dealerDrawnCard + 2}.`;
+			}
+
+			// Handles if an Ace brings the dealer over a score of 21
+			// Converts the Ace from 11 points to 1 point if so
+			if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
+				drawnCard = 13;
+				gameStatus = 'The dealer revealed an Ace (1).';
+			} else {
+				gameStatus = 'The dealer revealed an Ace (11).';
+			}
+			dealerHand += dealerDrawnCard;
+
+			// Updates game status
+			await i.update({
+				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+			});
+
+			while (dealerHand <= 16) {
 				// Allows user to read game status before continuing
 				await wait(1500);
 				dealerDrawnCard = Math.floor(Math.random() * 13);
 
 				// Shows user what card the dealer drew
 				if (dealerDrawnCard === 9) {
-					gameStatus = `The dealer revealed a Jack (10).`;
+					gameStatus = `The dealer drew a Jack (10).`;
 				} else if (dealerDrawnCard === 10) {
-					gameStatus = 'The dealer revealed a Queen (10).';
+					gameStatus = 'The dealer drew a Queen (10).';
 				} else if (dealerDrawnCard === 11) {
-					gameStatus = 'The dealer revealed a King (10).';
-				} else if (dealerDrawnCard === 12) {
-					gameStatus = 'The dealer revealed an Ace (10).';
-				} else {
-					gameStatus = `The dealer revealed a ${dealerDrawnCard + 2}.`;
+					gameStatus = 'The dealer drew a King (10).';
+				} else if (dealerDrawnCard !== 12) {
+					gameStatus = `The dealer drew a ${dealerDrawnCard + 2}.`;
 				}
 
 				// Converts an Ace from 11 points to 1 point if total points is over 21
-				if (dealerDrawnCard === 11 && (dealerDrawnCard + dealerHand) > 21) {
-					dealerDrawnCard = 1;
+				if (dealerDrawnCard === 12 && (playerHand + dealerDrawnCard) > 21) {
+					drawnCard = 13;
+					gameStatus = 'The dealer drew an Ace (1).';
+				} else {
+					gameStatus = 'The dealer drew an Ace (11).';
 				}
+				dealerHand += dealerDrawnCard;
 
 				// Updates game status
 				await i.update({
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
-
-				if (dealerHand <= 16) {
-					//
-				} else {
-					gameStatus = 'The dealer stands.';
-					collector.stop('stand');
-				}
 			}
+			gameStatus = 'The dealer stands.';
+			collector.stop('stand');
+		}
 
-			// Handles a "rules" button click
-			if (i.customId === 'blackjack_rules') {
-				return;
+		// Handles a "rules" button click
+		async function handleRules(i: ButtonInteraction) {
+			return;
+		}
+
+		collector.on('collect', async (i) => {
+			// Handles a "hit", "stand", or "rules" button click
+			if (i.customId === 'blackjack_hit') {
+				await handleHit(i);
+			} else if (i.customId === 'blackjack_stand') {
+				await handleStand(i);
+			} else if (i.customId === 'blackjack_rules') {
+				await handleRules(i);
 			}
 		});
 
