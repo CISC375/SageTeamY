@@ -220,7 +220,12 @@ export default class extends Command {
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
 			}
-			gameStatus = 'The dealer stands.';
+			if (dealerHand <= 21) {
+				gameStatus = 'The dealer stands.';
+			} else {
+				gameStatus = 'The dealer busts! You win!';
+			}
+
 			await i.editReply({
 				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 			});
