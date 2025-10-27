@@ -11,12 +11,7 @@ import { ChatInputCommandInteraction,
 
 /*
  TO DO:
- "Stand" button functionality
  "Rules" button functionality
- Dealer's hand logic
- Embed = Green on winning game
- Testing proper Ace functionality
- Implementing a winning game state
 */
 
 // Introduces a helper "wait" function to make the bot wait X amount of milliseconds
@@ -131,11 +126,12 @@ export default class extends Command {
 
 			// Handles if an Ace brings the player over a score of 21
 			// Converts the Ace from 11 points to 1 point if so
-			if (drawnCard === 12 && (playerHand + 11) > 21) {
-				drawnCard = 13;
-				gameStatus = 'You drew an Ace (1).';
-			} else if (drawnCard === 12) {
+			if (drawnCard === 12) {
 				gameStatus = 'You drew an Ace (11).';
+				if ((playerHand + 11) > 21) {
+					drawnCard = 13;
+					gameStatus = 'You drew an Ace (1).';
+				}
 			}
 			playerHand += deck[drawnCard];
 
@@ -194,11 +190,12 @@ export default class extends Command {
 
 			// Handles if an Ace brings the dealer over a score of 21
 			// Converts the Ace from 11 points to 1 point if so
-			if (dealerDrawnCard === 12 && (dealerHand + 11) > 21) {
-				drawnCard = 13;
-				gameStatus = 'The dealer revealed an Ace (1).';
-			} else if (dealerDrawnCard === 12) {
+			if (dealerDrawnCard === 12) {
 				gameStatus = 'The dealer revealed an Ace (11).';
+				if ((dealerHand + 11) > 21) {
+					drawnCard = 13;
+					gameStatus = 'The dealer revealed an Ace (1).';
+				}
 			}
 			dealerHand += deck[dealerDrawnCard];
 
@@ -225,11 +222,12 @@ export default class extends Command {
 				}
 
 				// Converts an Ace from 11 points to 1 point if total points is over 21
-				if (dealerDrawnCard === 12 && (dealerHand + 11) > 21) {
-					drawnCard = 13;
-					gameStatus = 'The dealer drew an Ace (1).';
-				} else if (dealerDrawnCard === 12) {
+				if (dealerDrawnCard === 12) {
 					gameStatus = 'The dealer drew an Ace (11).';
+					if ((dealerHand + 11) > 21) {
+						drawnCard = 13;
+						gameStatus = 'The dealer drew an Ace (1).';
+					}
 				}
 				dealerHand += deck[dealerDrawnCard];
 
