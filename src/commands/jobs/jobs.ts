@@ -26,7 +26,7 @@ import { JobResult } from '@root/src/lib/types/JobResult';
 import { Interest } from '@root/src/lib/types/Interest';
 import { JobData } from '@root/src/lib/types/JobData';
 import { Command } from '@lib/types/Command';
-import { DB, BOT, MAP_KEY } from '@root/config';
+import { DB, BOT, GOOGLE_MAPS_KEY } from '@root/config';
 import { MongoClient } from 'mongodb';
 import axios from 'axios';
 import { JobPreferences } from '@root/src/lib/types/JobPreferences';
@@ -577,7 +577,7 @@ export default class extends Command {
 
 	async queryCoordinates(location: string): Promise<{ lat: number; lng: number }> {
 		const preferredCity = encodeURIComponent(location);
-		const baseURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${preferredCity}&components=country:US&key=${MAP_KEY}`;
+		const baseURL = `https://maps.googleapis.com/maps/api/geocode/json?address=${preferredCity}&components=country:US&key=${GOOGLE_MAPS_KEY}`;
 		const response = await axios.get(baseURL);
 		return {
 			lat: response.data.results[0].geometry.location.lat,

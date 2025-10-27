@@ -1,11 +1,11 @@
 import {
-	APP_ID,
-	APP_KEY,
+	ADZUNA_APP_ID,
+	ADZUNA_APP_KEY,
 	BOT,
 	CHANNELS,
 	DB,
 	EMAIL,
-	MAP_KEY
+	GOOGLE_MAPS_KEY
 } from '@root/config';
 import {
 	ActionRowBuilder,
@@ -221,7 +221,7 @@ async function queryCoordinates(
 ): Promise<{ lat: number; lng: number }> {
 	const preferredCity = encodeURIComponent(location);
 
-	const baseURL = `https://maps.google.com/maps/api/geocode/json?address=${preferredCity}&components=country:US&key=${MAP_KEY}`;
+	const baseURL = `https://maps.google.com/maps/api/geocode/json?address=${preferredCity}&components=country:US&key=${GOOGLE_MAPS_KEY}`;
 	const response = await axios.get(baseURL);
 	const coordinates: { lat: number; lng: number } = {
 		lat: response.data.results[0].geometry.location.lat,
@@ -724,7 +724,7 @@ export async function generateJobPDF(
 		];
 
 		const jobTitle = encodeURIComponent(job.title);
-		const URL_BASE = `https://api.adzuna.com/v1/api/jobs/us/histogram?app_id=${APP_ID}&app_key=${APP_KEY}&what=${jobTitle}`;
+		const URL_BASE = `https://api.adzuna.com/v1/api/jobs/us/histogram?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&what=${jobTitle}`;
 
 		const response = await axios.get(URL_BASE);
 		const data = Object.entries(response.data.histogram).map(
