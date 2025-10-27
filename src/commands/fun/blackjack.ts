@@ -140,9 +140,18 @@ export default class extends Command {
 			playerHand += deck[drawnCard];
 
 			// Updates game status
-			await i.editReply({
-				embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
-			});
+			if (playerHand >= 21) {
+				// Removes buttons if bust
+				const hitBustEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
+				await response.resource.message.edit({
+					embeds: [hitBustEmbed],
+					components: []
+				});
+			} else {
+				await i.editReply({
+					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
+				});
+			}
 
 			// Checks if the user "busts"
 			if (playerHand > 21) {
