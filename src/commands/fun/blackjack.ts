@@ -182,6 +182,13 @@ export default class extends Command {
 				await i.update({
 					embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)]
 				});
+
+				if (dealerHand <= 16) {
+					//
+				} else {
+					gameStatus = 'The dealer stands.';
+					collector.stop('stand');
+				}
 			}
 
 			// Handles a "rules" button click
@@ -197,6 +204,13 @@ export default class extends Command {
 			// Tells user if the game timed out
 			if (reason === 'time') {
 				gameStatus = 'Game timed out.';
+			} else if (reason === 'stand') {
+				// Tells user who had the higher points
+				if (dealerHand >= playerHand) {
+					gameStatus = 'Dealer wins.';
+				} else {
+					gameStatus = 'You win!';
+				}
 			}
 
 			// Updates game embed, and removes the buttons
