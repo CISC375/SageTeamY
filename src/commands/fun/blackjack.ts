@@ -25,11 +25,16 @@ export default class extends Command {
 	extendedHelp = 'Get a higher score than Sage, but do not exceed 21!';
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
+		/* Deck consists of cards numbered 2-10.
+		Repeated 10s account for Jack, Queen, King.
+		11 resembles Ace*/
 		const deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11];
 		let playerHand = 0;
+		// Draws two random cards and adds them together from deck[]
 		playerHand = deck[Math.floor(Math.random() * 13)] + deck[Math.floor(Math.random() * 13)];
 		const dealerHand = deck[Math.floor(Math.random() * 13)];
 		let drawnCard = 0;
+		// GameStatus is the text appearing at the bottom of the Game Embed
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
 
@@ -85,14 +90,14 @@ export default class extends Command {
 		const response = await interaction.reply({
 			embeds: [createGameEmbed(playerHand, dealerHand, gameStatus)],
 			components: [row],
-			fetchReply: true
+			withResponse: true
 		});
 
 		// Only the user who started the command can interact with the buttons
 		const filter = (i: ButtonInteraction) => i.user.id === interaction.user.id;
 
 		// "Listens" for clicks on the buttons
-		const collector = response.createMessageComponentCollector({
+		const collector = response.resource.message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			filter: filter,
 			time: 60000 // You have 1 minute before the buttons are disabled
@@ -147,7 +152,7 @@ export default class extends Command {
 
 			// Updates game embed, and removes the buttons
 			const finalEmbed = createGameEmbed(playerHand, dealerHand, gameStatus);
-			await response.edit({
+			await response.resource.message.edit({
 				embeds: [finalEmbed],
 				components: []
 			});
