@@ -32,6 +32,10 @@ export default async function fetchJobListings(jobData: JobData, interests?: Int
 
 		for (const interest of keys) {
 			const value = interests[interest];
+			if (!value) {
+				delete interests[interest];
+				continue;
+			}
 			whatInterests += value.replace(/\s+/g, '-'); // Replace spaces with dashes
 			if (value !== lastValue) whatInterests += ' ';
 		}
