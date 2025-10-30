@@ -6,6 +6,9 @@
     },
     "parser": "@typescript-eslint/parser",
     "parserOptions": { "ecmaVersion": 2018, "sourceType": "module" },
+
+	"ignorePatterns": ["dist/**"],
+	
     "rules": {
         "no-extra-parens": ["warn", "all", {
             "nestedBinaryExpressions": false

@@ -6,13 +6,15 @@ import { Command } from '@lib/types/Command';
 import { showMainMenu } from '../../newreminders/menu-handlers';
 
 export default class extends Command {
-    description = `View ${BOT.NAME} reminders menu.`;
-    extendedHelp = 'Create reminders for anything - one-time or recurring job alerts with optional email notifications.';
-    options = []; // No options needed as we are using buttons
 
-    async run(
-        interaction: ChatInputCommandInteraction
-    ): Promise<void> {
-        await showMainMenu(interaction);
-    }
+	description = `View ${BOT.NAME} reminders menu.`;
+	extendedHelp = 'Create reminders for anything - one-time or recurring job alerts with optional email notifications.';
+	options = []; // No options needed as we are using buttons
+
+	async run(
+		interaction: ChatInputCommandInteraction
+	): Promise<void> {
+		await showMainMenu(interaction);
+	}
+
 }
