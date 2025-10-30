@@ -1,7 +1,7 @@
 interface Config {
-	APP_ID: string;
-	APP_KEY: string;
-	MAP_KEY: string;
+	ADZUNA_APP_ID: string;
+	ADZUNA_APP_KEY: string;
+	GOOGLE_MAPS_KEY: string;
 	DB_CONNECTION: string;
 	BOT_NAME: string;
 	BOT_TOKEN: string;
@@ -58,9 +58,9 @@ function getEnvVar(name: keyof Config): string {
 }
 
 export const config: Config = {
-	APP_ID: getEnvVar('APP_ID'),
-	APP_KEY: getEnvVar('APP_KEY'),
-	MAP_KEY: getEnvVar('MAP_KEY'),
+	ADZUNA_APP_ID: getEnvVar('ADZUNA_APP_ID'),
+	ADZUNA_APP_KEY: getEnvVar('ADZUNA_APP_KEY'),
+	GOOGLE_MAPS_KEY: getEnvVar('GOOGLE_MAPS_KEY'),
 	DB_CONNECTION: getEnvVar('DB_CONNECTION'),
 	BOT_NAME: getEnvVar('BOT_NAME'),
 	BOT_TOKEN: getEnvVar('BOT_TOKEN'),
@@ -220,9 +220,8 @@ export const PREFIX = config.PREFIX;
 export const BLACKLIST = [config.BLACKLIST];
 
 export const GITHUB_TOKEN = config.ENV_GITHUB_TOKEN;
-export const { APP_ID } = config;
-export const { APP_KEY } = config;
-export const { MAP_KEY } = config;
+export const { ADZUNA_APP_ID, ADZUNA_APP_KEY } = config;
+export const { GOOGLE_MAPS_KEY } = config;
 
 // eslint-disable-next-line prefer-destructuring
 export const MONGO = config.MONGO;
