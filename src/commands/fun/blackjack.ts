@@ -32,6 +32,7 @@ export default class extends Command {
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
 		let win = false;
+		let tie = false;
 
 		// Accounts for two aces drawn at the start, going over 21
 		if (playerHand === 22) {
@@ -53,10 +54,12 @@ export default class extends Command {
 				.setFooter({ text: status });
 
 			// Color of the embed on the left changes depending on if it's game over or not
-			if (gameOver && !win) {
+			if (gameOver && !win && !tie) {
 				embed.setColor('Red');
 			} else if (gameOver && win) {
 				embed.setColor('Green');
+			} else if (gameOver && !win && tie) {
+				embed.setColor('Grey');
 			} else {
 				embed.setColor('Blue');
 			}
