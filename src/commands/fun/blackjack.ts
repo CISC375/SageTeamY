@@ -298,9 +298,7 @@ export default class extends Command {
 					{
 						name: 'Winning',
 						value: 'The player who doesn\'t bust and has the most points wins!\n' +
-						'Ties: When both players have the same score, and the neither player started with a score of 21, no one wins.\n' +
-						'If one player has 21 at the start of the game, they win automatically.\n' +
-						'If both players have 21 at the start of the game, the game ties.'
+						'Ties: When both players have the same score, no one wins.\n'
 					}
 				);
 
@@ -347,11 +345,14 @@ export default class extends Command {
 				gameStatus = 'Game timed out.';
 			} else if (reason === 'stand') {
 				// Tells user who had the higher points
-				if (dealerHand >= playerHand) {
+				if (dealerHand > playerHand) {
 					gameStatus = 'Sage wins.';
-				} else {
+				} else if (dealerHand < playerHand) {
 					gameStatus = 'You win!';
 					win = true;
+				} else if (dealerHand === playerHand) {
+					gameStatus = 'You tied.';
+					tie = true;
 				}
 			}
 
