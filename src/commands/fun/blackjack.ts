@@ -298,7 +298,9 @@ export default class extends Command {
 					{
 						name: 'Winning',
 						value: 'The player who doesn\'t bust and has the most points wins!\n' +
-						'Ties: The dealer automatically wins ties.'
+						'Ties: When both players have the same score, and the neither player started with a score of 21, no one wins.\n' +
+						'If one player has 21 at the start of the game, they win automatically.\n' +
+						'If both players have 21 at the start of the game, the game ties.'
 					}
 				);
 
