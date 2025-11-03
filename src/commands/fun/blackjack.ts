@@ -170,7 +170,7 @@ export default class extends Command {
 				components: []
 			});
 
-			// Allows user to read game status before continuing
+			// Allows user to read game status before continuing (1.5 seconds)
 			await wait(1500);
 
 			dealerDrawnCard = Math.floor(Math.random() * 13);
@@ -320,8 +320,7 @@ export default class extends Command {
 				await i.reply({
 					content: 'Failed to send you a DM. Here are the rules: \n\n',
 					embeds: [rulesEmbed],
-					// eslint-disable-next-line no-mixed-spaces-and-tabs
-            		ephemeral: true
+					ephemeral: true
 				});
 			}
 		}
