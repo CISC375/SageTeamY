@@ -32,6 +32,7 @@ export default class extends Command {
 		let gameStatus = "Click 'Hit' to draw or 'Stand' to pass";
 		let gameOver = false;
 		let win = false;
+		let tie = false;
 
 		// Accounts for two aces drawn at the start, going over 21
 		if (playerHand === 22) {
@@ -53,10 +54,12 @@ export default class extends Command {
 				.setFooter({ text: status });
 
 			// Color of the embed on the left changes depending on if it's game over or not
-			if (gameOver && !win) {
+			if (gameOver && !win && !tie) {
 				embed.setColor('Red');
 			} else if (gameOver && win) {
 				embed.setColor('Green');
+			} else if (gameOver && !win && tie) {
+				embed.setColor('Grey');
 			} else {
 				embed.setColor('Blue');
 			}
@@ -167,7 +170,7 @@ export default class extends Command {
 				components: []
 			});
 
-			// Allows user to read game status before continuing
+			// Allows user to read game status before continuing (1.5 seconds)
 			await wait(1500);
 
 			dealerDrawnCard = Math.floor(Math.random() * 13);
@@ -200,7 +203,7 @@ export default class extends Command {
 			});
 
 			// Keeps hitting if below 17 point threshold
-			while (dealerHand <= 16 && dealerHand < playerHand) {
+			while (dealerHand <= 16 && dealerHand <= playerHand) {
 				// Allows user to read game status before continuing
 				await wait(1500);
 				dealerDrawnCard = Math.floor(Math.random() * 13);
@@ -295,7 +298,7 @@ export default class extends Command {
 					{
 						name: 'Winning',
 						value: 'The player who doesn\'t bust and has the most points wins!\n' +
-						'Ties: The dealer automatically wins ties.'
+						'Ties: When both players have the same score, no one wins.\n'
 					}
 				);
 
@@ -317,8 +320,7 @@ export default class extends Command {
 				await i.reply({
 					content: 'Failed to send you a DM. Here are the rules: \n\n',
 					embeds: [rulesEmbed],
-					// eslint-disable-next-line no-mixed-spaces-and-tabs
-            		ephemeral: true
+					ephemeral: true
 				});
 			}
 		}
@@ -343,11 +345,14 @@ export default class extends Command {
 				gameStatus = 'Game timed out.';
 			} else if (reason === 'stand') {
 				// Tells user who had the higher points
-				if (dealerHand >= playerHand) {
+				if (dealerHand > playerHand) {
 					gameStatus = 'Sage wins.';
-				} else {
+				} else if (dealerHand < playerHand) {
 					gameStatus = 'You win!';
 					win = true;
+				} else if (dealerHand === playerHand) {
+					gameStatus = 'You tied.';
+					tie = true;
 				}
 			}
 
