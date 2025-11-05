@@ -7,8 +7,8 @@ import { ChartConfiguration } from 'chart.js';
 
 export default class extends Command {
 
-	description = `Get a listing of jobs based on your interests and preferences.`;
-	extendedHelp = `This command will return a listing of jobs based on your interests and preferences.`;
+	description = `View a histogram of how many jobs are available at different salary ranges.`;
+	extendedHelp = `See how many jobs are available at different salaries`;
 	options: ApplicationCommandOptionData[] = [
 		{
 			name: 'job',
