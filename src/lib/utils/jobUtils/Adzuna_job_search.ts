@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { APP_ID, APP_KEY } from '@root/config';
+import { ADZUNA_APP_ID, ADZUNA_APP_KEY } from '@root/config';
 import { JobData } from '../../types/JobData';
 import { Interest } from '../../types/Interest';
 import { JobListing } from '../../types/JobListing';
@@ -57,8 +57,8 @@ export default async function fetchJobListings(jobData: JobData, interests?: Int
 		'Media', 'Radiologist', 'Producer', 'examiner', 'Physician', 'Medical',
 		'Cardiovascular', 'Purificiation', 'Residential'];
 	const URL_BASE
-	= `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${APP_ID}` +
-	`&app_key=${APP_KEY}` +
+	= `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}` +
+	`&app_key=${ADZUNA_APP_KEY}` +
 	`&results_per_page=10` +
 	`&what=${JOB_TYPE}` +
 	`&what_or=${encodedWhatOr}` +
@@ -90,4 +90,3 @@ export default async function fetchJobListings(jobData: JobData, interests?: Int
 		throw error;
 	}
 }
-
