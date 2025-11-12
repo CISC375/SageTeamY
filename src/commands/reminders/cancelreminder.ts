@@ -1,6 +1,17 @@
 import { Reminder } from '@lib/types/Reminder';
 import { DB } from '@root/config';
-import { ActionRowBuilder, ApplicationCommandOptionData, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, ChatInputCommandInteraction, ComponentType, InteractionResponse, StringSelectMenuBuilder } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ApplicationCommandOptionData,
+	ApplicationCommandOptionType,
+	ButtonBuilder,
+	ButtonStyle,
+	ChatInputCommandInteraction,
+	ComponentType,
+	InteractionResponse,
+	MessageFlags,
+	StringSelectMenuBuilder
+} from 'discord.js';
 import { Command } from '@lib/types/Command';
 import { ObjectId } from 'mongodb';
 
@@ -68,37 +79,37 @@ export default class extends Command {
 		if (reminders.length === 0) {
 			return interaction.reply({
 				content: 'You have no pending reminders. 🎉',
-				ephemeral: true
+				flags: MessageFlags.Ephemeral
 			});
 		}
 
 		// 1) Power path: cancel by ObjectId string
 		if (idOpt) {
-			let objId: ObjectId | null = null;
+			let objId: ObjectId;
 			try {
 				objId = new ObjectId(idOpt);
 			} catch {
 				return interaction.reply({
 					content: 'That ID is not a valid reminder identifier.',
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 
-			const toDelete = reminders.find(r => (r as any)._id?.toString() === objId!.toString());
+			const toDelete = reminders.find(r => (r as any)._id?.toString() === objId.toString());
 			if (!toDelete) {
 				return interaction.reply({
 					content: 'I couldn’t find a reminder with that ID. Use `/viewremind` or the dropdown instead.',
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 			const delRes = await coll.deleteOne({ _id: objId, owner: interaction.user.id });
 			if (delRes.deletedCount !== 1) {
-				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', ephemeral: true });
+				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', flags: MessageFlags.Ephemeral });
 			}
 			const hidden = toDelete.mode === 'private';
 			return interaction.reply({
 				content: `Canceled reminder: **${toDelete.content}**`,
-				ephemeral: hidden
+				flags: hidden ? MessageFlags.Ephemeral : undefined
 			});
 		}
 
@@ -108,7 +119,7 @@ export default class extends Command {
 			if (index < 0 || index >= reminders.length) {
 				return interaction.reply({
 					content: `I couldn’t find reminder **#${numberOpt}**. Use \`/viewremind\` to see your list.`,
-					ephemeral: true
+					flags: MessageFlags.Ephemeral
 				});
 			}
 			const reminder = reminders[index];
@@ -117,12 +128,12 @@ export default class extends Command {
 				owner: interaction.user.id
 			});
 			if (delRes.deletedCount !== 1) {
-				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', ephemeral: true });
+				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', flags: MessageFlags.Ephemeral });
 			}
 			const hidden = reminder.mode === 'private';
 			return interaction.reply({
 				content: `Canceled reminder: **${reminder.content}**`,
-				ephemeral: hidden
+				flags: hidden ? MessageFlags.Ephemeral : undefined
 			});
 		}
 
@@ -131,27 +142,27 @@ export default class extends Command {
 		const page = Math.min(Math.max(1, pageOpt), totalPages);
 		const { menu, navRow } = this.buildSelect(reminders, page, totalPages);
 
-		const msg = await interaction.reply({
+		const replyInteraction = await interaction.reply({
 			content: `Pick a reminder to cancel (page ${page}/${totalPages}):`,
 			components: navRow ? [menu, navRow] : [menu],
-			ephemeral: true,
-			fetchReply: true
+			flags: MessageFlags.Ephemeral,
+			withResponse: true
 		});
 
 		// Collect interactions from this user only, ephemeral
-		const collector = (msg as any).createMessageComponentCollector({
+		const collector = replyInteraction.resource.message.createMessageComponentCollector({
 			componentType: ComponentType.StringSelect,
 			time: 60_000,
-			filter: (i: any) => i.user.id === interaction.user.id
+			filter: (i) => i.user.id === interaction.user.id
 		});
 
-		const buttonCollector = (msg as any).createMessageComponentCollector({
+		const buttonCollector = replyInteraction.resource.message.createMessageComponentCollector({
 			componentType: ComponentType.Button,
 			time: 60_000,
-			filter: (i: any) => i.user.id === interaction.user.id
+			filter: (i) => i.user.id === interaction.user.id
 		});
 
-		collector.on('collect', async (i: any) => {
+		collector.on('collect', async (i) => {
 			const chosenId = i.values[0];
 			const chosen = reminders.find(r => (r as any)._id?.toString() === chosenId);
 			if (!chosen) {
@@ -174,11 +185,12 @@ export default class extends Command {
 			const disabledMenu = i.message.components?.[0] ?? null;
 			if (disabledMenu) {
 				// clone row & disable the select
-				const row = ActionRowBuilder.from(disabledMenu) as ActionRowBuilder<StringSelectMenuBuilder>;
+				const row = ActionRowBuilder.from(disabledMenu as any /* TODO fix this */) as ActionRowBuilder<StringSelectMenuBuilder>;
 				const select = StringSelectMenuBuilder.from(row.components[0] as any).setDisabled(true);
 				row.setComponents(select);
 				return i.update({
 					content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
+					// eslint-disable-next-line no-extra-parens -- nullish coalescing must occur before spread operator
 					components: [row, ...(i.message.components?.slice(1) ?? []), confirmRow]
 				});
 			}
@@ -190,7 +202,7 @@ export default class extends Command {
 		});
 
 
-		buttonCollector.on('collect', async (i: any) => {
+		buttonCollector.on('collect', async (i) => {
 			try {
 				if (i.customId === 'cancel') {
 					return i.update({ content: 'Okay, leaving your reminders as-is.', components: [] });
@@ -215,7 +227,7 @@ export default class extends Command {
 							components: []
 						});
 					}
-					const hidden = target?.mode === 'private';
+					// const hidden = target?.mode === 'private';
 					return i.update({
 						content: `Canceled reminder: **${target?.content ?? '(unknown)'}**`,
 						components: []
@@ -223,7 +235,7 @@ export default class extends Command {
 					});
 				}
 			} catch (err) {
-				return i.reply({ content: 'Unexpected error while handling your action.', ephemeral: true });
+				return i.reply({ content: 'Unexpected error while handling your action.', flags: MessageFlags.Ephemeral });
 			}
 		});
 	}
