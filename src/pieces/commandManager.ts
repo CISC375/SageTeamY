@@ -1,9 +1,25 @@
-import { Collection, Client, ApplicationCommand,
-	GuildMember, SelectMenuInteraction,
-	ModalSubmitInteraction, TextChannel, GuildMemberRoleManager,
-	ButtonInteraction, ModalBuilder, TextInputBuilder, ActionRowBuilder,
-	ModalActionRowComponentBuilder, ApplicationCommandType, ApplicationCommandDataResolvable, ChannelType, ApplicationCommandPermissionType, TextInputStyle,
-	ChatInputCommandInteraction } from 'discord.js';
+import {
+	Collection,
+	Client,
+	ApplicationCommand,
+	GuildMember,
+	SelectMenuInteraction,
+	ModalSubmitInteraction,
+	TextChannel,
+	GuildMemberRoleManager,
+	ButtonInteraction,
+	ModalBuilder,
+	TextInputBuilder,
+	ActionRowBuilder,
+	ModalActionRowComponentBuilder,
+	ApplicationCommandType,
+	ApplicationCommandDataResolvable,
+	ChannelType,
+	ApplicationCommandPermissionType,
+	TextInputStyle,
+	ChatInputCommandInteraction,
+	MessageFlags
+} from 'discord.js';
 import { isCmdEqual, readdirRecursive } from '@root/src/lib/utils/generalUtils';
 import { Command } from '@lib/types/Command';
 import { SageData } from '@lib/types/SageData';
@@ -326,14 +342,14 @@ async function runCommand(interaction: ChatInputCommandInteraction, bot: Client)
 		if (!success) return interaction.reply(failMessages[Math.floor(Math.random() * failMessages.length)]);
 
 		try {
-			bot.commands.get(interaction.commandName).run(interaction)
-				?.catch(async (error: Error) => { // Idk if this is needed now, but keeping in case removing it breaks stuff...
-					bot.emit('error', new CommandError(error, interaction));
-					interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
-				});
+			await bot.commands.get(interaction.commandName).run(interaction);
 		} catch (error) {
 			bot.emit('error', new CommandError(error, interaction));
-			interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, ephemeral: true });
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: `An error occurred. ${MAINTAINERS} have been notified.`, flags: MessageFlags.Ephemeral });
+			} else {
+				await interaction.reply({ content: `An error occurred. ${MAINTAINERS} have been notified.`, flags: MessageFlags.Ephemeral });
+			}
 			console.log(error.errors);
 		}
 	}
