@@ -26,16 +26,22 @@ export default class extends Command {
 
 		const URL_BASE = `https://api.adzuna.com/v1/api/jobs/us/histogram?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&what=${encodedJobTitle}`;
 
-		const response = await axios.get(URL_BASE);
-		const data = Object.entries(response.data.histogram).map(([value, frequency]: [string, number]) => ({
-			value,
-			frequency
-		}));
+		try {
+			const response = await axios.get(URL_BASE);
 
-		const image = await generateHistogram(data, jobTitle);
+			const data = Object.entries(response.data.histogram).map(([value, frequency]: [string, number]) => ({
+				value,
+				frequency
+			}));
 
+			const image = await generateHistogram(data, jobTitle);
 
-		await interaction.followUp({ files: [{ attachment: image, name: 'histogram.png' }] }); // Send the file as a follow-up
+			await interaction.followUp({ files: [{ attachment: image, name: 'histogram.png' }] }); // Send the file as a follow-up
+		} catch (e) {
+			console.error('Error fetching job salary data', e);
+			await interaction.followUp({ content: 'There was an issue fetching the job salary data. Please try again later.' });
+			return;
+		}
 	}
 
 }
