@@ -16,6 +16,7 @@ import { Command } from '@lib/types/Command';
 import { ObjectId } from 'mongodb';
 
 const PAGE_SIZE = 25;
+type DbReminder = Reminder & { _id: ObjectId };
 export default class extends Command {
 
 	description = 'Cancel any pending reminders you may have.';
@@ -69,7 +70,7 @@ export default class extends Command {
 		const idOpt = interaction.options.getString('id');
 		const pageOpt = interaction.options.getInteger('page') ?? 1;
 
-		const coll = interaction.client.mongo.collection<Reminder>(DB.REMINDERS);
+		const coll = interaction.client.mongo.collection<DbReminder>(DB.REMINDERS);
 		const reminders = await coll.find({ owner: interaction.user.id }).toArray();
 
 		// Sort by soonest first for a stable, predictable order
@@ -95,7 +96,7 @@ export default class extends Command {
 				});
 			}
 
-			const toDelete = reminders.find(r => (r as any)._id?.toString() === objId.toString());
+			const toDelete = reminders.find(r => r._id.toString() === objId.toString());
 			if (!toDelete) {
 				return interaction.reply({
 					content: 'I couldn’t find a reminder with that ID. Use `/viewremind` or the dropdown instead.',
@@ -124,7 +125,7 @@ export default class extends Command {
 			}
 			const reminder = reminders[index];
 			const delRes = await coll.deleteOne({
-				_id: (reminder as any)._id,
+				_id: reminder._id,
 				owner: interaction.user.id
 			});
 			if (delRes.deletedCount !== 1) {
@@ -164,7 +165,7 @@ export default class extends Command {
 
 		collector.on('collect', async (i) => {
 			const chosenId = i.values[0];
-			const chosen = reminders.find(r => (r as any)._id?.toString() === chosenId);
+			const chosen = reminders.find(r => r._id.toString() === chosenId);
 			if (!chosen) {
 				// since the collector is tied to this message, use update/deferUpdate patterns
 				return i.update({ content: 'That reminder no longer exists.', components: [] });
@@ -218,7 +219,7 @@ export default class extends Command {
 				if (i.customId.startsWith('confirm:')) {
 					const idStr = i.customId.split(':')[1];
 					const objId = new ObjectId(idStr);
-					const target = reminders.find(r => (r as any)._id?.toString() === idStr);
+					const target = reminders.find(r => r._id.toString() === idStr);
 					const delRes = await coll.deleteOne({ _id: objId, owner: interaction.user.id });
 
 					if (delRes.deletedCount !== 1) {
@@ -240,7 +241,7 @@ export default class extends Command {
 		});
 	}
 
-	private buildSelect(reminders: Reminder[], page: number, totalPages: number) {
+	private buildSelect(reminders: DbReminder[], page: number, totalPages: number) {
 		const start = (page - 1) * PAGE_SIZE;
 		const slice = reminders.slice(start, start + PAGE_SIZE);
 
@@ -252,7 +253,7 @@ export default class extends Command {
 					...slice.map((r, idx) => ({
 						label: this.truncate(r.content, 100),
 						description: `Due ${new Date(r.expires).toLocaleString()} • #${start + idx + 1}`,
-						value: (r as any)._id.toString()
+						value: r._id.toString()
 					}))
 				)
 		);
