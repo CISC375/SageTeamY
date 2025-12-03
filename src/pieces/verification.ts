@@ -23,7 +23,9 @@ export async function verify(interaction: ModalSubmitInteraction, bot: Client, g
 
 async function register(bot: Client): Promise<void> {
 	const guild = await bot.guilds.fetch(GUILDS.MAIN);
-	guild.members.fetch();
+	guild.members.fetch().catch(err => {
+		console.warn('guild.members.fetch() failed during verification', err);
+	});
 }
 
 export default register;
