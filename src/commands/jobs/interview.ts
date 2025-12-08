@@ -142,6 +142,7 @@ export default class extends Command {
 export async function handleInterviewOptionSelect(
 	i: StringSelectMenuInteraction
 ): Promise<void> {
+	if (i.customId !== 'interview_job_select') return;
 	// get the dropdown selection
 	const choice = i.values?.[0];
 	if (!choice) {
