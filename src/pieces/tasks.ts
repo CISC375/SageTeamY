@@ -30,7 +30,7 @@ import nodemailer from 'nodemailer';
 import { JobPreferences } from '../lib/types/JobPreferences';
 import axios from 'axios';
 import { PDFDocument, PDFFont, rgb, StandardFonts } from 'pdf-lib';
-import { generateHistogram } from '../commands/jobs/histogram';
+import { generateHistogram } from '../commands/jobs/jobsalarygraph';
 
 async function register(bot: Client): Promise<void> {
 	schedule('0/30 * * * * *', () => {

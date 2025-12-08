@@ -13,6 +13,7 @@ interface Config {
 	DB_JOB_FORMS: string;
 	DB_COURSES: string;
 	DB_REMINDERS: string;
+	DB_QUESTIONS: string;
 	DB_CLIENT_DATA: string;
 	DB_POLLS: string;
 	GUILD_MAIN: string;
@@ -159,6 +160,7 @@ export const DB = {
 	QTAGS: config.DB_QTAGS,
 	ASSIGNABLE: config.DB_ASSIGNABLE,
 	COURSES: config.DB_COURSES,
+	QUESTIONS: config.DB_QUESTIONS,
 	REMINDERS: config.DB_REMINDERS,
 	CLIENT_DATA: config.DB_CLIENT_DATA,
 	POLLS: config.DB_POLLS

@@ -28,7 +28,7 @@ export default class extends Command {
 				},
 				{
 					name: 'duration',
-					description: 'When you\'d like to be reminded',
+					description: 'When you\'d like to be reminded; enter units, e.g., "10 minutes", "2 hours", "1 day"',
 					type: ApplicationCommandOptionType.String,
 					required: true
 				},

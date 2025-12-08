@@ -279,7 +279,7 @@ export default class extends Command {
 			await db.findOne({ discordId: userID })
 		)?.jobPreferences;
 
-		if (!jobformAnswers) {
+		if (!jobformAnswers || !jobformAnswers.answers) {
 			await interaction.reply(
 				"You haven't set up your job preferences yet. Please use `/jobform` first."
 			);
