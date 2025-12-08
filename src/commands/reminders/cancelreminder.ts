@@ -1,5 +1,5 @@
-import { Reminder } from '@lib/types/Reminder';
-import { DB } from '@root/config';
+import {Reminder} from '@lib/types/Reminder';
+import {DB} from '@root/config';
 import {
 	ActionRowBuilder,
 	ApplicationCommandOptionData,
@@ -12,8 +12,8 @@ import {
 	MessageFlags,
 	StringSelectMenuBuilder
 } from 'discord.js';
-import { Command } from '@lib/types/Command';
-import { ObjectId } from 'mongodb';
+import {Command} from '@lib/types/Command';
+import {ObjectId} from 'mongodb';
 
 const PAGE_SIZE = 25;
 type DbReminder = Reminder & { _id: ObjectId };
@@ -45,33 +45,12 @@ export default class extends Command {
 	];
 
 	async run(interaction: ChatInputCommandInteraction): Promise<InteractionResponse<boolean> | void> {
-		/* const remindNum = interaction.options.getInteger('remindernumber') - 1;
-
-		const reminders: Array<Reminder> = await interaction.client.mongo.collection(DB.REMINDERS)
-			.find({ owner: interaction.user.id }).toArray();
-		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
-		const reminder = reminders[remindNum];
-
-		if (!reminder) {
-			interaction.reply({
-				content: `I couldn't find reminder **${remindNum}**. Use the \`viewremind\` command to see your current reminders.`,
-				ephemeral: true
-			});
-		}
-
-		interaction.client.mongo.collection(DB.REMINDERS).findOneAndDelete(reminder);
-
-		const hidden = reminder.mode === 'private';
-		return interaction.reply({
-			content: `Canceled reminder: **${reminder.content}**`,
-			ephemeral: hidden
-		}); */
 		const numberOpt = interaction.options.getInteger('remindernumber');
 		const idOpt = interaction.options.getString('id');
 		const pageOpt = interaction.options.getInteger('page') ?? 1;
 
 		const coll = interaction.client.mongo.collection<DbReminder>(DB.REMINDERS);
-		const reminders = await coll.find({ owner: interaction.user.id }).toArray();
+		const reminders = await coll.find({owner: interaction.user.id}).toArray();
 
 		// Sort by soonest first for a stable, predictable order
 		reminders.sort((a, b) => a.expires.valueOf() - b.expires.valueOf());
@@ -103,9 +82,12 @@ export default class extends Command {
 					flags: MessageFlags.Ephemeral
 				});
 			}
-			const delRes = await coll.deleteOne({ _id: objId, owner: interaction.user.id });
+			const delRes = await coll.deleteOne({_id: objId, owner: interaction.user.id});
 			if (delRes.deletedCount !== 1) {
-				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: 'Hmm, I couldn’t delete that. Try again.',
+					flags: MessageFlags.Ephemeral
+				});
 			}
 			const hidden = toDelete.mode === 'private';
 			return interaction.reply({
@@ -129,7 +111,10 @@ export default class extends Command {
 				owner: interaction.user.id
 			});
 			if (delRes.deletedCount !== 1) {
-				return interaction.reply({ content: 'Hmm, I couldn’t delete that. Try again.', flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: 'Hmm, I couldn’t delete that. Try again.',
+					flags: MessageFlags.Ephemeral
+				});
 			}
 			const hidden = reminder.mode === 'private';
 			return interaction.reply({
@@ -141,7 +126,7 @@ export default class extends Command {
 		// 3) Friendly path: interactive select menu (paginated)
 		const totalPages = Math.max(1, Math.ceil(reminders.length / PAGE_SIZE));
 		const page = Math.min(Math.max(1, pageOpt), totalPages);
-		const { menu, navRow } = this.buildSelect(reminders, page, totalPages);
+		const {menu, navRow} = this.buildSelect(reminders, page, totalPages);
 
 		const replyInteraction = await interaction.reply({
 			content: `Pick a reminder to cancel (page ${page}/${totalPages}):`,
@@ -168,7 +153,7 @@ export default class extends Command {
 			const chosen = reminders.find(r => r._id.toString() === chosenId);
 			if (!chosen) {
 				// since the collector is tied to this message, use update/deferUpdate patterns
-				return i.update({ content: 'That reminder no longer exists.', components: [] });
+				return i.update({ content: 'That reminder no longer exists.', components: []});
 			}
 
 			const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -184,16 +169,18 @@ export default class extends Command {
 
 			// optionally disable the select so users can't pick twice
 			const disabledMenu = i.message.components?.[0] ?? null;
-			if (disabledMenu) {
-				// clone row & disable the select
-				const row = ActionRowBuilder.from(disabledMenu as any /* TODO fix this */) as ActionRowBuilder<StringSelectMenuBuilder>;
-				const select = StringSelectMenuBuilder.from(row.components[0] as any).setDisabled(true);
-				row.setComponents(select);
-				return i.update({
-					content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
-					// eslint-disable-next-line no-extra-parens -- nullish coalescing must occur before spread operator
-					components: [row, ...(i.message.components?.slice(1) ?? []), confirmRow]
-				});
+			if (disabledMenu && disabledMenu.type === ComponentType.ActionRow && disabledMenu.components.length > 0) {
+				const select = disabledMenu.components[0];
+				if (select.customId === 'reminder-select' && select.type === ComponentType.StringSelect) {
+					const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+						StringSelectMenuBuilder.from(select).setDisabled(true)
+					);
+					return i.update({
+						content: `Are you sure you want to cancel:\n> **${chosen.content}**`,
+						// eslint-disable-next-line no-extra-parens -- nullish coalescing must occur before spread operator
+						components: [row, ...(i.message.components?.slice(1) ?? []), confirmRow]
+					});
+				}
 			}
 
 			return i.update({
@@ -206,11 +193,11 @@ export default class extends Command {
 		buttonCollector.on('collect', async (i) => {
 			try {
 				if (i.customId === 'cancel') {
-					return i.update({ content: 'Okay, leaving your reminders as-is.', components: [] });
+					return i.update({content: 'Okay, leaving your reminders as-is.', components: []});
 				}
 				if (i.customId.startsWith('page:')) {
 					const nextPage = Number(i.customId.split(':')[1]);
-					const { menu: nextMenu, navRow: nextNav } = this.buildSelect(reminders, nextPage, totalPages);
+					const {menu: nextMenu, navRow: nextNav} = this.buildSelect(reminders, nextPage, totalPages);
 					return i.update({
 						content: `Pick a reminder to cancel (page ${nextPage}/${totalPages}):`,
 						components: nextNav ? [nextMenu, nextNav] : [nextMenu]
@@ -220,7 +207,7 @@ export default class extends Command {
 					const idStr = i.customId.split(':')[1];
 					const objId = new ObjectId(idStr);
 					const target = reminders.find(r => r._id.toString() === idStr);
-					const delRes = await coll.deleteOne({ _id: objId, owner: interaction.user.id });
+					const delRes = await coll.deleteOne({_id: objId, owner: interaction.user.id});
 
 					if (delRes.deletedCount !== 1) {
 						return i.update({
@@ -236,7 +223,10 @@ export default class extends Command {
 					});
 				}
 			} catch (err) {
-				return i.reply({ content: 'Unexpected error while handling your action.', flags: MessageFlags.Ephemeral });
+				return i.reply({
+					content: 'Unexpected error while handling your action.',
+					flags: MessageFlags.Ephemeral
+				});
 			}
 		});
 	}
@@ -273,7 +263,7 @@ export default class extends Command {
 					.setDisabled(page >= totalPages)
 			);
 		}
-		return { menu, navRow };
+		return {menu, navRow};
 	}
 
 	private truncate(str: string, len: number) {
